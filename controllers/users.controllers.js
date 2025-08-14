@@ -93,3 +93,61 @@ const logout = async(req, res) =>{
         })
     }
 }
+
+
+const updateUser = async(req,res) =>{
+    const {skills = [], role, email} = req.body;
+    try{
+        if(req.user?.role !== "admin"){
+            res.status(404).json({
+                message:"Forbidden accesss"
+            });
+            const user = await userModel.findOne({email});
+            if(!user){
+                res.status(404).json({
+                    message:"could not find the user"
+                })
+
+
+            }
+
+            await userModel.updateOne(
+                {email},
+                {skills:skills.length?skills:user.skills,role}
+            )
+            return res.json({
+                message:"User updation done "
+            })
+        }
+    }catch(error){
+        res.status(500).json({
+            message:"Controller error in updation wordk not done"
+        })
+    }
+}
+
+const getDetails = async(req,res) =>{
+    
+    try{
+        if(req.user.role !== "admin"){
+            return res.status(403).json({
+                message:"Forbidden access, you are not admin"
+            })
+        }
+
+        const user = await userModel.find().select("-pass")
+        return res.json(user);
+        }catch(error){
+            res.status(500).json({
+                message:"controller error at the fetchin the data useing getDetails methods"
+            })
+    }
+}
+
+ export default {
+    signup,
+    login,
+    updateUser,
+    getDetails,
+    logout
+ }
